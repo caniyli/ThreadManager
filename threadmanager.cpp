@@ -6,19 +6,19 @@ ThreadManager::ThreadManager()
 
 ThreadManager::~ThreadManager()
 {
-    delete th;
+	delete th;
 }
 
 void ThreadManager::start()
 {
-	startTime = std::chrono::steady_clock::now();
 	stop_ = true;
-	waitforEnd = false;
 	th = new std::thread(&ThreadManager::run, this);
 }
 
 void ThreadManager::stop()
 {
+	conditionVariable.notify_all();
+	th->detach();
 }
 
 void ThreadManager::wait()
@@ -38,14 +38,22 @@ void ThreadManager::setInterval(int x)
 
 void ThreadManager::notify()
 {
-	std::cout << "thread notify" << std::endl;
+	/*std::lock_guard<std::mutex> G(mtx);
+	std::cout << "notify" << std::endl;
+	conditionVariable.notify_one();
+    //th->detach();*/
 }
 
 void ThreadManager::run()
 {
-	while (stop_) {
+	std::unique_lock<std::mutex> lock(mtx);
+
+	while (conditionVariable.wait_for(lock,
+									  std::chrono::milliseconds(milliSecond)) ==
+		   std::cv_status::timeout) {
 		int temp = cb();
-        if(temp) break;
-		std::this_thread::sleep_for(std::chrono::milliseconds(milliSecond));
+		if (temp)
+			break;
 	}
+	std::cout << "Thread sona erdi" << std::endl;
 }

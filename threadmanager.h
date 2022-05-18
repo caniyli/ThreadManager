@@ -23,13 +23,12 @@ public:
 private:
 	bool stop_ = true;
 	bool waitforEnd = false;
-	int miliSecond = 1000;
+	int milliSecond = 1000;
 	std::function<int()> cb;
 	void run();
-	std::chrono::steady_clock::time_point startTime;
     std::thread *th;
-    std::condition_variable cv;
-    std::mutex m;
+    std::mutex mtx;
+    std::condition_variable conditionVariable;
 };
 
 #endif // THREADMANAGER_H
