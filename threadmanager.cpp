@@ -52,9 +52,11 @@ void ThreadManager::run()
 {
 	std::unique_lock<std::mutex> lock(mtx);
 
-	while (!stop_) {
+	while (true) {
 		conditionVariable.wait_for(lock,
 								   std::chrono::milliseconds(milliSecond));
+		if (stop_)
+			break;
 		int temp = cb();
 		if (temp)
 			break;
