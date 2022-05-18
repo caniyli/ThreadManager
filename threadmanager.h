@@ -21,8 +21,6 @@ public:
 	void notify();
 
 private:
-	bool stop_ = true;
-	bool waitforEnd = false;
 	int milliSecond = 1000;
 	std::function<int()> cb;
 	void run();
