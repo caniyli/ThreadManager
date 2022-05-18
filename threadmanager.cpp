@@ -6,6 +6,7 @@ ThreadManager::ThreadManager()
 
 ThreadManager::~ThreadManager()
 {
+    stop();
 }
 
 void ThreadManager::start()
@@ -15,7 +16,7 @@ void ThreadManager::start()
 		return;
 	}
 	stop_ = false;
-	if (!th.joinable()) 
+	if (!th.joinable())
 		th = std::thread(&ThreadManager::run, this);
 	else
 		std::cout << "Thread zaten çalışıyor" << std::endl;
@@ -25,6 +26,7 @@ void ThreadManager::stop()
 {
 	stop_ = true;
 	conditionVariable.notify_all();
+	th.join();
 }
 
 void ThreadManager::wait()
