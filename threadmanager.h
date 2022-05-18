@@ -6,7 +6,6 @@
 #include <iostream>
 #include <thread>
 #include <condition_variable>
-#include <future>
 
 class ThreadManager
 {
@@ -21,10 +20,12 @@ public:
 	void notify();
 
 private:
+	bool stop_ = false;
+    bool isRunning = false;
 	int milliSecond = 1000;
-	std::function<int()> cb;
+	std::function<int()> cb = NULL;
 	void run();
-    std::thread *th;
+    std::thread th;
     std::mutex mtx;
     std::condition_variable conditionVariable;
 };
