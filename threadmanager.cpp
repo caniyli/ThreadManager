@@ -15,10 +15,9 @@ void ThreadManager::start()
 		return;
 	}
 	stop_ = false;
-	if (!isRunning) {
+	if (!th.joinable()) 
 		th = std::thread(&ThreadManager::run, this);
-		isRunning = true;
-	} else
+	else
 		std::cout << "Thread zaten çalışıyor" << std::endl;
 }
 
@@ -50,11 +49,12 @@ void ThreadManager::notify()
 
 void ThreadManager::run()
 {
-	std::unique_lock<std::mutex> lock(mtx);
-
 	while (true) {
-		conditionVariable.wait_for(lock,
-								   std::chrono::milliseconds(milliSecond));
+		{
+			std::unique_lock<std::mutex> lock(mtx);
+			conditionVariable.wait_for(lock,
+									   std::chrono::milliseconds(milliSecond));
+		}
 		if (stop_)
 			break;
 		int temp = cb();
@@ -62,5 +62,4 @@ void ThreadManager::run()
 			break;
 	}
 	std::cout << "Thread sona erdi" << std::endl;
-	isRunning = false;
 }

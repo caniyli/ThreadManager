@@ -21,7 +21,6 @@ public:
 
 private:
 	bool stop_ = false;
-    bool isRunning = false;
 	int milliSecond = 1000;
 	std::function<int()> cb = NULL;
 	void run();
