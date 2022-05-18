@@ -6,24 +6,31 @@ ThreadManager::ThreadManager()
 
 ThreadManager::~ThreadManager()
 {
-	delete th;
 }
 
 void ThreadManager::start()
 {
-	stop_ = true;
-	th = new std::thread(&ThreadManager::run, this);
+	if (cb == NULL) {
+		std::cout << "Thread başlatılamadı fonksiyon girilmeli" << std::endl;
+		return;
+	}
+	stop_ = false;
+	if (!isRunning) {
+		th = std::thread(&ThreadManager::run, this);
+		isRunning = true;
+	} else
+		std::cout << "Thread zaten çalışıyor" << std::endl;
 }
 
 void ThreadManager::stop()
 {
+	stop_ = true;
 	conditionVariable.notify_all();
-	th->detach();
 }
 
 void ThreadManager::wait()
 {
-	th->join();
+	th.join();
 }
 
 void ThreadManager::setFunc(std::function<int()> cb)
@@ -38,22 +45,20 @@ void ThreadManager::setInterval(int x)
 
 void ThreadManager::notify()
 {
-	/*std::lock_guard<std::mutex> G(mtx);
-	std::cout << "notify" << std::endl;
 	conditionVariable.notify_one();
-    //th->detach();*/
 }
 
 void ThreadManager::run()
 {
 	std::unique_lock<std::mutex> lock(mtx);
 
-	while (conditionVariable.wait_for(lock,
-									  std::chrono::milliseconds(milliSecond)) ==
-		   std::cv_status::timeout) {
+	while (!stop_) {
+		conditionVariable.wait_for(lock,
+								   std::chrono::milliseconds(milliSecond));
 		int temp = cb();
 		if (temp)
 			break;
 	}
 	std::cout << "Thread sona erdi" << std::endl;
+	isRunning = false;
 }
